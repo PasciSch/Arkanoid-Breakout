@@ -8,6 +8,23 @@ public class BallsManager : MonoBehaviour
 {
     #region Signleton
     private static BallsManager _instance;
+    public int MaxBalls = 12;
+
+    public void SpawnBalls(Vector3 position, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            if (this.Balls.Count <= this.MaxBalls)
+            {
+                Ball spawnedBall = Instantiate(ballPrefab, position, Quaternion.identity) as Ball;
+
+                Rigidbody2D spawnedBallRb = spawnedBall.GetComponent<Rigidbody2D>();
+                spawnedBallRb.isKinematic = false;
+                spawnedBallRb.AddForce(new Vector2(0, initialBallSpeed));
+                this.Balls.Add(spawnedBall);
+            }
+        }
+    }
 
     public static BallsManager Instance => _instance;
 

@@ -67,6 +67,7 @@ public class BricksManager : MonoBehaviour
     {
         this.CurrentLevel = level;
         this.ClearRemainingBricks();
+        CollectableManager.Instance.ClearRemainingCollectables();
         this.GenerateBricks();
     }
 

@@ -10,13 +10,17 @@ public class BallsManager : MonoBehaviour
     private static BallsManager _instance;
     public int MaxBalls = 12;
 
-    public void SpawnBalls(Vector3 position, int count)
+    public void SpawnBalls(Vector3 position, int count, bool isLightningBall)
     {
         for (int i = 0; i < count; i++)
         {
             if (this.Balls.Count <= this.MaxBalls)
             {
                 Ball spawnedBall = Instantiate(ballPrefab, position, Quaternion.identity) as Ball;
+                if (isLightningBall)
+                {
+                    spawnedBall.StartLightningBall();
+                }
 
                 Rigidbody2D spawnedBallRb = spawnedBall.GetComponent<Rigidbody2D>();
                 spawnedBallRb.isKinematic = false;

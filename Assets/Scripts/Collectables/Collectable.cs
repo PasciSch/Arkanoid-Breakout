@@ -13,6 +13,7 @@ public abstract class Collectable : MonoBehaviour
 
         if (collision.tag == "Paddle" || collision.tag == "DeathWall")
         {
+            CollectableManager.Instance.CurrentCollectables.Remove(this);
             Destroy(this.gameObject);
         }
     }

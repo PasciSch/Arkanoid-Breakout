@@ -6,6 +6,7 @@ using static UnityEngine.ParticleSystem;
 public class Brick : MonoBehaviour
 {
     private SpriteRenderer sr;
+    private BoxCollider2D boxCollider;
     public int Hitpoints = 1;
 
     public static event Action<Brick> OnBrickDestruction;
@@ -13,19 +14,48 @@ public class Brick : MonoBehaviour
 
     private void Awake() {
         this.sr = this.GetComponent<SpriteRenderer>();
+        this.boxCollider = this.GetComponent<BoxCollider2D>();
+        Ball.OnLightningBallEnable += OnLightningBallEnable;
+        Ball.OnLightningBallDisable += OnLightningBallDisable;
     }
 
+    private void OnLightningBallEnable(Ball ball)
+    {
+        if(this != null)
+        {
+            this.boxCollider.isTrigger = true;
+        }
+    }
+    private void OnLightningBallDisable(Ball ball)
+    {
+        if(this != null)
+        {
+            this.boxCollider.isTrigger = false;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D trigger) 
+    {
+        if (trigger.gameObject.tag == "Ball")
+        {
+            Ball ball = trigger.gameObject.GetComponent<Ball>();
+            ApplyCollisionLigic(ball);
+        }
+    }
     private void OnCollisionEnter2D(Collision2D collision) 
     {
-        Ball ball = collision.gameObject.GetComponent<Ball>();
-        ApplyCollisionLigic(ball);
+        if (collision.gameObject.tag == "Ball")
+        {
+            Ball ball = collision.gameObject.GetComponent<Ball>();
+            ApplyCollisionLigic(ball);
+        }
     }
 
     private void ApplyCollisionLigic(Ball ball)
     {
         this.Hitpoints--;
 
-        if (this.Hitpoints <= 0)
+        if (this.Hitpoints <= 0 || (ball != null && ball.isLightningBall))
         {
             BricksManager.Instance.RemainingBricks.Remove(this);
             OnBrickDestruction?.Invoke(this);
@@ -48,12 +78,12 @@ public class Brick : MonoBehaviour
         if (buffSpawnChance <= CollectableManager.Instance.BuffChance)
         {
             alredySpawned = true;
-            Collectable newBuff = this.SpawnCollectable(true);
+            CollectableManager.Instance.CurrentCollectables.Add(this.SpawnCollectable(true));
         }
         
         if(deBuffSpawnChance <= CollectableManager.Instance.DebuffChance && !alredySpawned)
         {
-            Collectable newDebuf = this.SpawnCollectable(false);
+            CollectableManager.Instance.CurrentCollectables.Add(this.SpawnCollectable(false));
         }
     }
 
@@ -93,5 +123,11 @@ public class Brick : MonoBehaviour
         this.sr.sprite = sprite;
         this.sr.color = color;
         this.Hitpoints = hitpoints;
+    }
+
+    private void OnDisable() 
+    {
+        Ball.OnLightningBallEnable -= OnLightningBallEnable;
+        Ball.OnLightningBallDisable -= OnLightningBallDisable;
     }
 }
